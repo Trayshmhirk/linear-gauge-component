@@ -13,7 +13,7 @@ The Linear gauge is a web component designed to visually represent drug concentr
 
 ## Screenshot
 
-![](/linear-gauge-component/img/linear%20gauge%20image.png)
+![](img/linear%20gauge%20image.png)
 
 ## Installation
 
