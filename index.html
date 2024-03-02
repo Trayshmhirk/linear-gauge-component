@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Drugs Linear Gauge</title>
+      <style>
+         /* CSS styles here */
+         .linear-gauge {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+         }
+
+         .linear-gauge-container {
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
+         }
+
+         .pointer-input {
+            margin-bottom: 10px;
+         }
+
+         .gauge {
+            position: relative;
+            width: 100%;
+         }
+
+         .range-container {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            width: 100%;
+            height: 15px;
+         }
+
+         .range {
+            position: absolute;
+            top: 0;
+            height: 100%;
+         }
+
+         .good-range {
+            background-color: green;
+         }
+
+         .mid-range {
+            background-color: orange;
+         }
+
+         .bad-range {
+            background-color: red;
+         }
+
+         .pointer {
+            position: absolute;
+            top: -70%;
+            left: calc(50% - 5px);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 15px solid;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) rotate(180deg);
+            cursor: pointer;
+         }
+
+         .tooltip {
+            position: absolute;
+            top: -117px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            pointer-events: none;
+            transform: translate(-50%, -50%) rotate(180deg);
+
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            width: 130px;
+         }
+
+         .pointer-triangle {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 15px solid rgba(0, 0, 0, 0.8);
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+         }
+
+         .range-type {
+            font-weight: bold;
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 25px;
+            text-align: center;
+         }
+
+         .range-category {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+         }
+      </style>
+   </head>
+   <body>
+      <div id="app" class="App"></div>
+
+      <script>
+         // JavaScript code here
+         // Define LinearGauge component
+         function LinearGauge({ ranges, pointers }) {
+            function getCategoryColor(category) {
+               switch (category) {
+                  case "good":
+                     return "green";
+                  case "mid":
+                     return "orange";
+                  case "bad":
+                     return "red";
+                  default:
+                     return "gray";
+               }
+            }
+
+            function renderRanges() {
+               const totalRange =
+                  ranges[ranges.length - 1].end - ranges[0].start;
+               return ranges
+                  .map(
+                     (range, index) => `
+                        <div
+                           key="${index}"
+                           class="range"
+                           style="
+                              width: ${
+                                 ((range.end - range.start) / totalRange) * 100
+                              }%;
+                              left: ${
+                                 ((range.start - ranges[0].start) /
+                                    totalRange) *
+                                 100
+                              }%;
+                              background-color: ${getCategoryColor(
+                                 range.category
+                              )};
+                           "
+                        ></div>
+                        `
+                  )
+                  .join("");
+            }
+
+            function renderPointers() {
+               return pointers
+                  .map(
+                     (pointer, index) => `
+                         <div
+                  key="${index}"
+                  class="pointer"
+                  style="
+                     left: ${
+                        (pointer.value / ranges[ranges.length - 1].end) * 100
+                     }%;
+                     border-bottom-color: ${pointer.color};
+                  "
+                  data-value="${pointer.value}" 
+               >
+                  <div class="tooltip">
+                     <div class="pointer-triangle"></div>
+                     <div>
+                        <b>${pointer.value}</b> g/ml
+                     </div>
+                     <div class="range-type" style="background: ${
+                        pointer.rangeTypeColor
+                     }">${pointer.rangeType}</div>
+                     <div class="range-category">
+                        NORMAL RANGE
+                        <b class="range-value">
+                           ${
+                              ranges.find((range) => range.category === "good")
+                                 .start
+                           } - ${
+                        ranges.find((range) => range.category === "good").end
+                     }
+                        </b>
+                     </div>
+                  </div>
+               </div>
+
+                     `
+                  )
+                  .join("");
+            }
+
+            return `
+               <div class="linear-gauge-container">
+                  <div class="gauge">
+                     <div class="range-container">${renderRanges()}</div>
+                     ${renderPointers()}
+                  </div>
+               </div>
+            `;
+         }
+
+         // Define DrugComponent component
+         function DrugComponent() {
+            const drugs = [
+               {
+                  ranges: [
+                     { start: 0, end: 40, category: "bad" },
+                     { start: 40, end: 95, category: "mid" },
+                     { start: 95, end: 500, category: "good" },
+                     { start: 500, end: 650, category: "mid" },
+                     { start: 650, end: 800, category: "bad" },
+                  ],
+                  pointers: [
+                     {
+                        value: 350,
+                        color: "#948c92",
+                        rangeType: "Neutral",
+                        rangeTypeColor: "orange",
+                     },
+                     {
+                        value: 500,
+                        color: "#3b61bb",
+                        rangeType: "Healthy",
+                        rangeTypeColor: "#4cdfbb",
+                     },
+                     {
+                        value: 750,
+                        color: "",
+                        rangeType: "UNHEALTHY",
+                        rangeTypeColor: "red",
+                     },
+                  ],
+               },
+               // Define other drugs similarly
+            ];
+
+            return `
+               <div class="drug-component">
+               ${drugs
+                  .map(
+                     (drug, index) => `
+                     ${LinearGauge(drug)}
+                  `
+                  )
+                  .join("")}
+               </div>
+            `;
+         }
+
+         // Render DrugComponent component
+         document.getElementById("app").innerHTML = DrugComponent();
+
+         // Add event listeners to show tooltip on hover
+         const pointers = document.querySelectorAll(".pointer");
+         pointers.forEach((pointer) => {
+            pointer.addEventListener("mouseenter", () => {
+               const tooltip = pointer.querySelector(".tooltip");
+               if (tooltip) {
+                  tooltip.style.display = "flex";
+               }
+            });
+            pointer.addEventListener("mouseleave", () => {
+               const tooltip = pointer.querySelector(".tooltip");
+               if (tooltip) {
+                  tooltip.style.display = "none";
+               }
+            });
+         });
+      </script>
+   </body>
+</html>
